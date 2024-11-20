@@ -4,6 +4,7 @@ module my_first_package::example {
     // use sui::object::{Self, UID};
     // use sui::transfer;
     // use sui::tx_context::{Self, TxContext};
+    use std::debug;
 
     // Part 2: struct definitions
     public struct Sword has key, store {
@@ -41,7 +42,41 @@ module my_first_package::example {
         self.swords_created
     }
 
+    public fun new_sword(
+        forge: &mut Forge,
+        magic: u64,
+        strength: u64,
+        ctx: &mut TxContext,
+    ): Sword {
+        debug::print(forge);
+        forge.swords_created = forge.swords_created + 1;
+        debug::print(forge);
+        debug::print_stack_trace();
+        Sword {
+            id: object::new(ctx),
+            magic: magic,
+            strength: strength,
+        }
+    }
+
     // Part 5: Public/entry functions (introduced later in the tutorial)
 
     // Part 6: Tests
+    #[test]
+    fun test_sword_create() {
+        // Create a dummy TxContext for testing
+        let mut ctx = tx_context::dummy();
+
+        // Create a sword
+        let sword = Sword {
+            id: object::new(&mut ctx),
+            magic: 42,
+            strength: 7,
+        };
+
+        // Check if accessor functions return correct values
+        assert!(sword.magic() == 42 && sword.strength() == 7, 1);
+        let dummy_address = @0xCAFE;
+        transfer::public_transfer(sword, dummy_address);
+    }
 }
